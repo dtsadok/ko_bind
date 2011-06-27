@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Knockout+jQuery test with ko_bind</title>
+
+<meta name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org" />
+
+<script src="knockout.js"></script>
+<script src="jquery.js"></script>
+<script src="ko_bind.js"></script>
+
+<script>
+var initList = ["Alpha", "Beta", "Gamma"];
+
+//viewModel code from http://knockoutjs.com/
+var viewModel = {};
+viewModel.items = ko.observableArray(initList);
+viewModel.itemToAdd = ko.observable("");
+viewModel.addItem = function()
+{
+    if (viewModel.itemToAdd() != "")
+    {
+        viewModel.items.push(viewModel.itemToAdd()); // Adds the item. Writing to the "items" observableArray causes any associated UI to update.
+        viewModel.itemToAdd("");                     // Clears the text box, because it's bound to the "itemToAdd" observable
+    }
+}
+
+//with ko_bind we can use jQuery to nicely bind the data
+//instead of putting data-bind attributes in the HTML
+
+$(function() {
+  //we could do this
+  //$("form").attr("data-bind", "submit: addItem");
+
+  //but I think this is nicer
+  $("form").ko_bind("submit", "addItem");
+
+  //$("form :text").attr("data-bind", "value: itemToAdd, valueUpdate: \"afterkeydown\"");
+
+  $("form :text").ko_bind("value", "itemToAdd").ko_bind("valueUpdate", "\"afterkeydown\"");
+
+  $("form :submit").ko_bind("enable", "itemToAdd().length > 0");
+  $("form select").ko_bind("options", "items");
+  
+  //as before
+  ko.applyBindings(viewModel);
+});
+</script>
+</head>
+
+<body>
+
+<form>
+    New item:
+    <input />
+    <input type="submit" value="Add" />
+    <p>Your items:</p>
+    <select multiple="multiple" width="50"></select>
+</form>
+
+<!-- compare to HTML from knockoutjs.com original example:
+
+<form data-bind="submit: addItem">
+    New item:
+    <input data-bind='value: itemToAdd, valueUpdate: "afterkeydown"' />
+    <button type="submit" data-bind="enable: itemToAdd().length > 0">Add</button>
+    <p>Your items:</p>
+    <select multiple="multiple" width="50" data-bind="options: items"> </select>
+</form>
+
+-->
+</body>
+</html>
